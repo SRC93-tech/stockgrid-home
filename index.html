@@ -91,7 +91,12 @@
   .brand-mark .bar-amber  { animation: grid-grow-y 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
   .brand-mark .bar-teal   { animation: grid-grow-x 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
   .brand-mark .bar-pink   { animation: grid-grow-x 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
-  .brand-mark .patch      { animation: grid-fade 0.3s ease-out 0.56s both; }
+  /* Patches are drawn statically (always fill: currentColor via their own
+     fill attribute, no animation) - not faded in on a timer. An earlier
+     version animated them in last; a page that gets backgrounded/throttled
+     mid-animation (confirmed happening in at least one automated browser
+     context) could leave them stuck invisible indefinitely. This is the
+     app's identity - it must never depend on an animation finishing. */
   @media (prefers-reduced-motion: reduce) {
     .brand-mark .bar, .brand-mark .patch { animation: none !important; transform: none !important; opacity: 1 !important; }
   }
@@ -741,7 +746,7 @@
       </svg>
       <span class="wordmark">StockGrid</span>
     </span>
-    <a href="mailto:chiragforyou2@gmail.com">Contact</a>
+    <a href="mailto:src93.appsupport@gmail.com">Contact</a>
   </header>
 
   <section class="hero">
@@ -1031,7 +1036,7 @@
     <span>&copy; 2026 StockGrid</span>
     <div class="links">
       <a href="https://src93-tech.github.io/stocklens-privacy/">Privacy Policy</a>
-      <a href="mailto:chiragforyou2@gmail.com">chiragforyou2@gmail.com</a>
+      <a href="mailto:src93.appsupport@gmail.com">src93.appsupport@gmail.com</a>
     </div>
   </footer>
 </div>
