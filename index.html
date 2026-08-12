@@ -1,765 +1,691 @@
-<title>StockGrid</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="StockGrid is a mobile app for garment manufacturers, wholesalers, and retailers to manage their product catalog and stock. Track products across sizes and colors, record every purchase and sale, and share your catalog with buyers." />
-<meta property="og:title" content="StockGrid — Catalog and Stock Management" />
-<meta property="og:description" content="StockGrid is a mobile app for garment manufacturers, wholesalers, and retailers to manage their product catalog and stock." />
-<meta property="og:type" content="website" />
-<link rel="icon" href="favicon.svg" type="image/svg+xml" />
-<style>
-  :root {
-    --bg: #f8f7fc;
-    --surface: #ffffff;
-    --text: #1e1b2e;
-    --text-muted: #635f78;
-    --accent: #4338ca;
-    --accent-soft: #eeecfb;
-    --border: #e3e1ee;
-  }
-
-  @media (prefers-color-scheme: dark) {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockGrid | The Catalog App Built for the Garment Trade</title>
+  <link href="favicon.svg" rel="icon" type="image/svg+xml">
+  <style>
+    /* Modern, clean CSS reset and base styles */
     :root {
-      --bg: #131020;
-      --surface: #1a1730;
-      --text: #edebf7;
-      --text-muted: #9c97b8;
-      --accent: #8b7ff0;
-      --accent-soft: #241f42;
-      --border: #2c2846;
+      --bg-dark: #03020A;
+      --accent-teal: #14B8A6;
+      --accent-indigo: #4F46E5;
+      --text-main: #111827;
+      --text-muted: #4B5563;
+      --bg-light: #F9FAFB;
+
+      /* Aliases so the phone-mockup CSS below (lifted from the live site,
+         where it targets these shorter names) doesn't need every property
+         rewritten one by one - it just reads the same palette through
+         different variable names. */
+      --bg: var(--bg-light);
+      --surface: #ffffff;
+      --accent: var(--accent-teal);
+      --accent-soft: #E6F7F5;
+      --border: #E5E7EB;
+      --text: var(--text-main);
     }
-  }
-
-  :root[data-theme="dark"] {
-    --bg: #131020; --surface: #1a1730; --text: #edebf7;
-    --text-muted: #9c97b8; --accent: #8b7ff0; --accent-soft: #241f42; --border: #2c2846;
-  }
-  :root[data-theme="light"] {
-    --bg: #f8f7fc; --surface: #ffffff; --text: #1e1b2e;
-    --text-muted: #635f78; --accent: #4338ca; --accent-soft: #eeecfb; --border: #e3e1ee;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .page {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  header.masthead {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2rem 0;
-  }
-
-  .brand-group {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-  }
-
-  .wordmark {
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-weight: 600;
-    font-size: 1.15rem;
-    color: var(--accent);
-    letter-spacing: 0.01em;
-  }
-
-  /* Brand mark: same locked geometry as assets/icon_source.svg in the app
-     repo - four rounded bars woven into a tilted "#". Each bar grows from
-     its own center along its long axis, staggered, with the two weave
-     patches fading in last so the interlock reads as a finishing touch -
-     mirrors the entrance used for StockGridMark in the Flutter app. */
-  .brand-mark .bar, .brand-mark .patch {
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  @keyframes grid-grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-  @keyframes grid-grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-  @keyframes grid-fade { from { opacity: 0; } to { opacity: 1; } }
-  .brand-mark .bar-indigo { animation: grid-grow-y 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0s both; }
-  .brand-mark .bar-amber  { animation: grid-grow-y 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
-  .brand-mark .bar-teal   { animation: grid-grow-x 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
-  .brand-mark .bar-pink   { animation: grid-grow-x 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both; }
-  /* Patches are drawn statically (always fill: currentColor via their own
-     fill attribute, no animation) - not faded in on a timer. An earlier
-     version animated them in last; a page that gets backgrounded/throttled
-     mid-animation (confirmed happening in at least one automated browser
-     context) could leave them stuck invisible indefinitely. This is the
-     app's identity - it must never depend on an animation finishing. */
-  @media (prefers-reduced-motion: reduce) {
-    .brand-mark .bar, .brand-mark .patch { animation: none !important; transform: none !important; opacity: 1 !important; }
-  }
-
-  header.masthead a {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-  }
-  header.masthead a:hover, header.masthead a:focus-visible {
-    color: var(--accent);
-  }
-
-  .hero {
-    padding: 2.5rem 0 4.5rem;
-  }
-
-  @media (max-width: 760px) {
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: var(--text-main);
+      background-color: var(--bg-light);
+      line-height: 1.5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 5%;
+      background: white;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    header a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+    }
     .hero {
-      padding-top: 1rem;
+      padding: 5rem 5%;
       text-align: center;
+      background: white;
     }
-    .hero-text { align-items: center; margin: 0 auto; }
-    .hero-text .lede { max-width: 48ch; }
-  }
-
-  .hero-text {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    min-width: 0;
-    max-width: 640px;
-  }
-
-  .eyebrow {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-
-  h1 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-weight: 600;
-    font-size: clamp(2rem, 4vw, 2.6rem);
-    line-height: 1.15;
-    margin: 0;
-    text-wrap: balance;
-    letter-spacing: -0.01em;
-  }
-
-  .lede {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    margin: 0;
-    max-width: 50ch;
-  }
-
-  /* ---- Phone mockup: an illustrative recreation of the app's real
-     Catalog grid and per-size stock chips, not a literal screenshot -
-     product "photos" are placeholder gradients, not real product images. ---- */
-  .phone-frame {
-    flex: none;
-    width: 240px;
-    aspect-ratio: 9 / 19.3;
-    background: #0c0a16;
-    border-radius: 34px;
-    padding: 10px;
-    box-shadow: 0 40px 70px -28px rgba(30, 20, 60, 0.45), 0 6px 18px -8px rgba(30, 20, 60, 0.25);
-    position: relative;
-  }
-
-  /* Android punch-hole camera, not an iPhone-style notch. */
-  .phone-punchhole {
-    position: absolute;
-    top: 19px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
-    background: #0c0a16;
-    border-radius: 50%;
-    z-index: 2;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
-  }
-
-  /* Android gesture-nav bar, replacing the iPhone home indicator. */
-  .phone-gesture-bar {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--text-muted);
-    opacity: 0.35;
-    z-index: 2;
-  }
-
-  .phone-screen {
-    width: 100%;
-    height: 100%;
-    background: var(--surface);
-    border-radius: 22px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-
-  .app-statusbar {
-    height: 26px;
-    flex: none;
-  }
-
-  .app-header {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2px 14px 10px;
-  }
-
-  .app-header span {
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--text);
-  }
-
-  .app-header svg { color: var(--text-muted); }
-
-  .app-grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 8px;
-    padding: 0 14px 16px;
-  }
-
-  .app-tile {
-    display: flex;
-    flex-direction: column;
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--bg);
-    border: 1px solid var(--border);
-  }
-
-  .app-tile-photo {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .app-tile-info {
-    padding: 6px 7px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .app-tile-id {
-    font-size: 9.5px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .app-tile-cat {
-    font-size: 8px;
-    color: var(--text-muted);
-  }
-
-  .app-tile-stock {
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--chip-color);
-  }
-
-  .app-callout {
-    margin: 12px 10px 0;
-    background: var(--accent-soft);
-    border-radius: 12px;
-    padding: 10px 11px 11px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .app-callout-label {
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-  }
-
-  .app-callout-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .app-chip {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 3px 6px;
-    border-radius: 20px;
-    background: color-mix(in srgb, var(--chip-color) 12%, transparent);
-    color: var(--chip-color);
-  }
-  .stock-ok { --chip-color: #1a8f5a; }
-  .stock-out { --chip-color: #d64545; }
-
-  @media (prefers-color-scheme: dark) {
-    .stock-ok { --chip-color: #4ade95; }
-    .stock-out { --chip-color: #f28b8b; }
-  }
-  :root[data-theme="dark"] .stock-ok { --chip-color: #4ade95; }
-  :root[data-theme="dark"] .stock-out { --chip-color: #f28b8b; }
-  :root[data-theme="light"] .stock-ok { --chip-color: #1a8f5a; }
-  :root[data-theme="light"] .stock-out { --chip-color: #d64545; }
-
-  /* ---- Two mockups side by side: Catalog above, Home dashboard below. ---- */
-  .phone-stack {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 28px;
-    margin-top: 0.5rem;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-  }
-
-  @media (max-width: 760px) {
-    .phone-stack { justify-content: center; }
-  }
-
-  @media (max-width: 560px) {
-    .phone-stack { flex-direction: column; align-items: center; }
-  }
-
-  .app-summary-card {
-    flex: none;
-    margin: 10px 14px 0;
-    background: #26215c;
-    border-radius: 12px;
-    padding: 12px 13px;
-  }
-
-  .app-summary-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .app-summary-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #eeedfe;
-  }
-
-  .app-summary-period {
-    font-size: 9px;
-    color: #cecbf6;
-  }
-
-  .app-summary-row {
-    display: flex;
-    gap: 18px;
-    margin-top: 10px;
-  }
-
-  .app-summary-label {
-    font-size: 7.5px;
-    color: #afa9ec;
-  }
-
-  .app-summary-value {
-    font-size: 17px;
-    font-weight: 700;
-    margin-top: 3px;
-  }
-
-  .app-summary-value.sold { color: #ffb74d; }
-  .app-summary-value.purchased { color: #64b5f6; }
-
-  .app-allitems-card {
-    flex: none;
-    margin: 8px 14px 0;
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 9px 11px;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-  }
-
-  .app-allitems-icon {
-    flex: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    background: var(--accent);
-  }
-
-  .app-allitems-label { font-size: 9px; color: var(--accent); }
-  .app-allitems-count { font-size: 14px; font-weight: 700; color: var(--text); }
-  .app-allitems-alert { font-size: 7.5px; font-weight: 700; text-decoration: underline; margin-top: 1px; }
-
-  .app-trend-card {
-    flex: 1;
-    min-height: 0;
-    margin: 12px 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .app-trend-legend {
-    flex: none;
-    display: flex;
-    gap: 10px;
-  }
-
-  .app-trend-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 8px;
-    color: var(--text-muted);
-  }
-
-  .app-trend-legend-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 2px;
-  }
-
-  .app-trend-legend-dot.sold { background: #ffb74d; }
-  .app-trend-legend-dot.purchased { background: #64b5f6; }
-
-  .app-trend-bars {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 2px;
-  }
-
-  .app-trend-group {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 2px;
-  }
-
-  .app-trend-bar {
-    width: 4px;
-    border-radius: 2px 2px 0 0;
-  }
-
-  .app-trend-bar.sold { background: #ffb74d; }
-  .app-trend-bar.purchased { background: #64b5f6; }
-
-  .app-trend-labels {
-    flex: none;
-    display: flex;
-    gap: 4px;
-  }
-
-  .app-trend-labels span {
-    flex: 1;
-    text-align: center;
-    font-size: 6.5px;
-    color: var(--text-muted);
-  }
-
-  .app-report-list {
-    flex: 1;
-    min-height: 0;
-    margin-top: 4px;
-    background: var(--bg);
-    padding: 10px 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .app-report-card {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 9px 10px;
-  }
-
-  .app-report-icon {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    color: #1976d2;
-  }
-
-  .app-report-icon svg { width: 100%; height: 100%; }
-
-  .app-report-text { flex: 1; min-width: 0; }
-  .app-report-title { font-size: 9.5px; font-weight: 700; color: var(--text); }
-  .app-report-desc { font-size: 7.5px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
-  .app-report-chevron { flex: none; font-size: 13px; color: var(--text-muted); opacity: 0.6; }
-
-  .app-backup-list {
-    flex: 1;
-    min-height: 0;
-    margin-top: 4px;
-    padding: 10px 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .app-backup-card {
-    flex: none;
-    background: var(--accent-soft);
-    border-radius: 10px;
-    padding: 9px 10px;
-  }
-
-  .app-backup-account { display: flex; align-items: center; gap: 8px; }
-
-  .app-backup-avatar {
-    flex: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #3a3a3a;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .app-backup-avatar svg { width: 12px; height: 12px; }
-
-  .app-backup-account-text { flex: 1; min-width: 0; }
-  .app-backup-email { font-size: 8.5px; font-weight: 700; color: var(--text); }
-  .app-backup-sub { font-size: 6.8px; color: var(--text-muted); margin-top: 1px; line-height: 1.3; }
-  .app-backup-link { flex: none; font-size: 7.5px; font-weight: 700; color: var(--accent); }
-
-  .app-backup-toggle-row { display: flex; align-items: center; gap: 8px; }
-  .app-backup-toggle-text { flex: 1; min-width: 0; }
-  .app-backup-title { font-size: 9px; font-weight: 700; color: var(--text); }
-
-  .app-toggle-switch {
-    flex: none;
-    width: 26px;
-    height: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    position: relative;
-  }
-  .app-toggle-knob {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--text-muted);
-  }
-
-  .app-toggle-switch.on {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  .app-toggle-switch.on .app-toggle-knob {
-    left: auto;
-    right: 2px;
-    background: #fff;
-  }
-
-  .app-backup-radios {
-    border-top: 1px solid var(--border);
-    margin-top: 8px;
-    padding-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-  }
-  .app-backup-radio {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 8px;
-    color: var(--text);
-  }
-  .app-radio-dot {
-    flex: none;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 1.4px solid var(--text-muted);
-    position: relative;
-  }
-  .app-backup-radio.selected .app-radio-dot { border-color: var(--accent); }
-  .app-backup-radio.selected .app-radio-dot::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-
-  .app-backup-lastline { font-size: 8px; color: var(--text-muted); margin-bottom: 8px; }
-
-  .app-backup-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    height: 22px;
-    border-radius: 12px;
-    font-size: 7.5px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-  .app-backup-btn svg { width: 10px; height: 10px; flex: none; }
-  .app-backup-btn.primary { background: #000; color: #fff; margin-bottom: 6px; }
-  .app-backup-btn.outline { border: 1px solid var(--chip-color); color: var(--chip-color); }
-
-  .features {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    padding-bottom: 4rem;
-  }
-
-  @media (max-width: 560px) {
-    .features { grid-template-columns: 1fr; }
-  }
-
-  .feature {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .feature .icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--accent-soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-  }
-
-  .feature h2 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-weight: 600;
-    font-size: 1.05rem;
-    margin: 0;
-  }
-
-  .feature p {
-    margin: 0;
-    font-size: 0.92rem;
-    color: var(--text-muted);
-  }
-
-  .audience {
-    padding-bottom: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    max-width: 60ch;
-  }
-
-  .audience h2 {
-    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
-    font-weight: 600;
-    font-size: 1.3rem;
-    margin: 0;
-  }
-
-  .audience p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem 0 3rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  footer .links {
-    display: flex;
-    gap: 1.25rem;
-  }
-
-  footer a {
-    color: var(--text-muted);
-    text-decoration: none;
-  }
-  footer a:hover, footer a:focus-visible {
-    color: var(--accent);
-  }
-
-  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-</style>
-
-<div class="page">
-  <header class="masthead">
-    <span class="brand-group">
+    .hero span.eyebrow {
+      color: var(--accent-indigo);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.875rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      line-height: 1.1;
+      margin: 1rem auto;
+      max-width: 900px;
+      letter-spacing: -0.02em;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 2rem auto;
+    }
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-dark);
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 8px;
+      font-size: 1.125rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .cta-button:hover {
+      background-color: #1a1a24;
+      transform: translateY(-2px);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 5rem 5%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      /* Same dark treatment as .highlight-section below it on the page -
+         reusing that section's own colors, not a new palette. */
+      background: var(--bg-dark);
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--bg-dark);
+    }
+    .feature-card h2 {
+      font-size: 1.25rem;
+      margin: 0 0 1rem 0;
+      color: white;
+    }
+    .feature-card p {
+      color: #D1D5DB;
+      margin: 0;
+    }
+    .highlight-section {
+      background: var(--bg-dark);
+      color: white;
+      text-align: center;
+      padding: 5rem 5%;
+    }
+    .highlight-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .highlight-section p {
+      font-size: 1.25rem;
+      max-width: 800px;
+      margin: 0 auto 2.5rem auto;
+      color: #D1D5DB;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 5%;
+      background: white;
+      border-top: 1px solid #E5E7EB;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    footer .links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+    footer .links a:hover {
+      color: var(--bg-dark);
+    }
+    @media (max-width: 768px) {
+      footer {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      footer .links a {
+        margin: 0 0.75rem;
+      }
+    }
+
+    /* Brand mark: same locked geometry as assets/icon_source.svg in the app
+       repo - four rounded bars woven into a tilted "#". This is the app's
+       identity - keep it exactly as-is, no restyling. */
+    .brand-mark { flex: none; }
+
+    /* Disabled-looking, not a dead link: no Play Store listing exists yet,
+       so both CTAs below are spans (no href), not anchors - a "coming soon"
+       signal instead of a button that goes nowhere. */
+    .cta-button.disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+    .cta-button.disabled:hover {
+      background-color: var(--bg-dark);
+      transform: none;
+    }
+    .hero .cta-button.disabled:hover { background-color: var(--bg-dark); }
+    .highlight-section .cta-button.disabled:hover { background-color: white; }
+
+    /* ---- Phone mockup: an illustrative recreation of the app's real
+       Catalog grid and per-size stock chips, not a literal screenshot -
+       product "photos" are placeholder gradients, not real product images. ---- */
+    .phone-frame {
+      flex: none;
+      width: 240px;
+      aspect-ratio: 9 / 19.3;
+      background: #0c0a16;
+      border-radius: 34px;
+      padding: 10px;
+      box-shadow: 0 40px 70px -28px rgba(30, 20, 60, 0.45), 0 6px 18px -8px rgba(30, 20, 60, 0.25);
+      position: relative;
+    }
+
+    /* Android punch-hole camera, not an iPhone-style notch. */
+    .phone-punchhole {
+      position: absolute;
+      top: 19px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 10px;
+      background: #0c0a16;
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06);
+    }
+
+    /* Android gesture-nav bar, replacing the iPhone home indicator. */
+    .phone-gesture-bar {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--text-muted);
+      opacity: 0.35;
+      z-index: 2;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: var(--surface);
+      border-radius: 22px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .app-statusbar {
+      height: 26px;
+      flex: none;
+    }
+
+    .app-header {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 14px 10px;
+    }
+
+    .app-header span {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .app-header svg { color: var(--text-muted); }
+
+    .app-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+      padding: 0 14px 16px;
+    }
+
+    .app-tile {
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .app-tile-photo {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .app-tile-info {
+      padding: 6px 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-tile-id {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .app-tile-cat {
+      font-size: 8px;
+      color: var(--text-muted);
+    }
+
+    .app-tile-stock {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--chip-color);
+    }
+
+    .app-callout {
+      margin: 12px 10px 0;
+      background: var(--accent-soft);
+      border-radius: 12px;
+      padding: 10px 11px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .app-callout-label {
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+    }
+
+    .app-callout-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .app-chip {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--chip-color) 12%, transparent);
+      color: var(--chip-color);
+    }
+    .stock-ok { --chip-color: #1a8f5a; }
+    .stock-out { --chip-color: #d64545; }
+
+    /* ---- Two mockups side by side. ---- */
+    .phone-stack {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 2.5rem;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+    }
+
+    @media (max-width: 760px) {
+      .phone-stack { justify-content: center; }
+    }
+
+    @media (max-width: 560px) {
+      .phone-stack { flex-direction: column; align-items: center; }
+    }
+
+    .app-summary-card {
+      flex: none;
+      margin: 10px 14px 0;
+      background: var(--accent-indigo);
+      border-radius: 12px;
+      padding: 12px 13px;
+    }
+
+    .app-summary-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-summary-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #eeedfe;
+    }
+
+    .app-summary-period {
+      font-size: 9px;
+      color: #cecbf6;
+    }
+
+    .app-summary-row {
+      display: flex;
+      gap: 18px;
+      margin-top: 10px;
+    }
+
+    .app-summary-label {
+      font-size: 7.5px;
+      color: #afa9ec;
+    }
+
+    .app-summary-value {
+      font-size: 17px;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+
+    .app-summary-value.sold { color: #ffb74d; }
+    .app-summary-value.purchased { color: #64b5f6; }
+
+    .app-allitems-card {
+      flex: none;
+      margin: 8px 14px 0;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 11px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .app-allitems-icon {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--accent);
+    }
+
+    .app-allitems-label { font-size: 9px; color: var(--accent); }
+    .app-allitems-count { font-size: 14px; font-weight: 700; color: var(--text); }
+    .app-allitems-alert { font-size: 7.5px; font-weight: 700; text-decoration: underline; margin-top: 1px; }
+
+    .app-trend-card {
+      flex: 1;
+      min-height: 0;
+      margin: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .app-trend-legend {
+      flex: none;
+      display: flex;
+      gap: 10px;
+    }
+
+    .app-trend-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 8px;
+      color: var(--text-muted);
+    }
+
+    .app-trend-legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+    }
+
+    .app-trend-legend-dot.sold { background: #ffb74d; }
+    .app-trend-legend-dot.purchased { background: #64b5f6; }
+
+    .app-trend-bars {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2px;
+    }
+
+    .app-trend-group {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .app-trend-bar {
+      width: 4px;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .app-trend-bar.sold { background: #ffb74d; }
+    .app-trend-bar.purchased { background: #64b5f6; }
+
+    .app-trend-labels {
+      flex: none;
+      display: flex;
+      gap: 4px;
+    }
+
+    .app-trend-labels span {
+      flex: 1;
+      text-align: center;
+      font-size: 6.5px;
+      color: var(--text-muted);
+    }
+
+    .app-report-list {
+      flex: 1;
+      min-height: 0;
+      margin-top: 4px;
+      background: var(--bg);
+      padding: 10px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .app-report-card {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+
+    .app-report-icon {
+      flex: none;
+      width: 20px;
+      height: 20px;
+      color: #1976d2;
+    }
+
+    .app-report-icon svg { width: 100%; height: 100%; }
+
+    .app-report-text { flex: 1; min-width: 0; }
+    .app-report-title { font-size: 9.5px; font-weight: 700; color: var(--text); }
+    .app-report-desc { font-size: 7.5px; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+    .app-report-chevron { flex: none; font-size: 13px; color: var(--text-muted); opacity: 0.6; }
+
+    .app-backup-list {
+      flex: 1;
+      min-height: 0;
+      margin-top: 4px;
+      padding: 10px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .app-backup-card {
+      flex: none;
+      background: var(--accent-soft);
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+
+    .app-backup-account { display: flex; align-items: center; gap: 8px; }
+
+    .app-backup-avatar {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #3a3a3a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .app-backup-avatar svg { width: 12px; height: 12px; }
+
+    .app-backup-account-text { flex: 1; min-width: 0; }
+    .app-backup-email { font-size: 8.5px; font-weight: 700; color: var(--text); }
+    .app-backup-sub { font-size: 6.8px; color: var(--text-muted); margin-top: 1px; line-height: 1.3; }
+    .app-backup-link { flex: none; font-size: 7.5px; font-weight: 700; color: var(--accent); }
+
+    .app-backup-toggle-row { display: flex; align-items: center; gap: 8px; }
+    .app-backup-toggle-text { flex: 1; min-width: 0; }
+    .app-backup-title { font-size: 9px; font-weight: 700; color: var(--text); }
+
+    .app-toggle-switch {
+      flex: none;
+      width: 26px;
+      height: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+    }
+    .app-toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .app-toggle-switch.on {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .app-toggle-switch.on .app-toggle-knob {
+      left: auto;
+      right: 2px;
+      background: #fff;
+    }
+
+    .app-backup-radios {
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .app-backup-radio {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 8px;
+      color: var(--text);
+    }
+    .app-radio-dot {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.4px solid var(--text-muted);
+      position: relative;
+    }
+    .app-backup-radio.selected .app-radio-dot { border-color: var(--accent); }
+    .app-backup-radio.selected .app-radio-dot::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .app-backup-lastline { font-size: 8px; color: var(--text-muted); margin-bottom: 8px; }
+
+    .app-backup-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      height: 22px;
+      border-radius: 12px;
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .app-backup-btn svg { width: 10px; height: 10px; flex: none; }
+    .app-backup-btn.primary { background: #000; color: #fff; margin-bottom: 6px; }
+    .app-backup-btn.outline { border: 1px solid var(--chip-color); color: var(--chip-color); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
       <svg class="brand-mark" width="40" height="40" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <g transform="rotate(8 512 512)">
-          <rect class="bar bar-teal" x="302" y="404" width="420" height="72" rx="36" fill="#14B8A6"/>
-          <rect class="bar bar-pink" x="302" y="548" width="420" height="72" rx="36" fill="#FB7185"/>
-          <rect class="bar bar-indigo" x="404" y="302" width="72" height="420" rx="36" fill="#4F46E5"/>
-          <rect class="bar bar-amber" x="548" y="302" width="72" height="420" rx="36" fill="#F59E0B"/>
-          <rect class="patch" x="404" y="404" width="72" height="72" fill="#14B8A6"/>
-          <rect class="patch" x="548" y="548" width="72" height="72" fill="#FB7185"/>
+          <rect x="302" y="404" width="420" height="72" rx="36" fill="#14B8A6"/>
+          <rect x="302" y="548" width="420" height="72" rx="36" fill="#FB7185"/>
+          <rect x="404" y="302" width="72" height="420" rx="36" fill="#4F46E5"/>
+          <rect x="548" y="302" width="72" height="420" rx="36" fill="#F59E0B"/>
+          <rect x="404" y="404" width="72" height="72" fill="#14B8A6"/>
+          <rect x="548" y="548" width="72" height="72" fill="#FB7185"/>
         </g>
       </svg>
-      <span class="wordmark">StockGrid</span>
-    </span>
-    <a href="mailto:src93.appsupport@gmail.com">Contact</a>
+      <span>StockGrid</span>
+    </div>
+    <a href="mailto:src93.appsupport@gmail.com">Contact Support</a>
   </header>
 
   <section class="hero">
-    <div class="hero-text">
-      <span class="eyebrow">For garment businesses</span>
-      <h1>Inventory, catalog, and stock management built for garment manufacturers, wholesalers, and retailers</h1>
-      <p class="lede">
-        StockGrid is a mobile app for garment businesses to manage their product catalog and
-        stock. Track products across sizes and colors, record every purchase and sale as it happens,
-        and share your catalog with buyers — all from one app, built specifically for how
-        garment businesses actually keep stock.
-      </p>
-    </div>
+    <span class="eyebrow">For Garment Manufacturers & Wholesalers</span>
+    <h1>The only catalog app built for the reality of the garment trade.</h1>
+    <p>
+      Stop losing track of your lots. StockGrid is the mobile command center for your product catalog and warehouse stock. Track sizes, record sales as they happen, and share your inventory with buyers instantly.
+    </p>
+    <span class="cta-button disabled" aria-disabled="true">Coming soon to Google Play</span>
 
     <div class="phone-stack">
     <div class="phone-frame" role="img" aria-label="StockGrid home screen showing sold and purchased totals, stock alerts, and the sales trend chart">
@@ -971,72 +897,68 @@
     </div>
   </section>
 
-  <section class="features">
-    <div class="feature">
-      <div class="icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      </div>
-      <h2>Catalog Management</h2>
-      <p>Photos, sizes, colors, and pricing for every product, organized by category and kept up to date.</p>
+  <section class="features-grid">
+    <div class="feature-card">
+      <h2>The Command Center</h2>
+      <p>Stop guessing. Open the dashboard and instantly see your sold versus purchased quantities for the month, backed by visual trend charts and immediate alerts for low or out-of-stock items.</p>
     </div>
-    <div class="feature">
-      <div class="icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 17L7 9M12 17L12 5M17 17L17 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h2>Stock Tracking</h2>
-      <p>Every purchase and sale recorded per size and color, with current stock always accurate.</p>
+    
+    <div class="feature-card">
+      <h2>Granular Audit Trails</h2>
+      <p>Total accountability. Whether you just moved 36 units to a specific buyer or needed to reverse a manual entry, you get a complete, timestamped history ledger for every single stock adjustment.</p>
     </div>
-    <div class="feature">
-      <div class="icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 19V13M10 19V9M16 19V5M4 19H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h2>Reports &amp; Insights</h2>
-      <p>Sales performance, inventory value, and low-stock alerts, exportable as PDF or CSV.</p>
+
+    <div class="feature-card">
+      <h2>1-Click PDF Catalogs</h2>
+      <p>Stop formatting documents manually. Generate professional PDF catalogs in seconds. Toggle your wholesale rates on or off and choose whether to include all color variants before firing it off to a buyer.</p>
     </div>
-    <div class="feature">
-      <div class="icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 18a5 5 0 01-1-9.9A6 6 0 0117.2 6.1 4.5 4.5 0 0117 15H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </div>
+    
+    <div class="feature-card">
+      <h2>Size & Lot Precision</h2>
+      <p>Track complex matrix structures effortlessly. Pin down exact sizes and final rates—like an 895 rate for a 24x34 lot or 1050 for a 36x40—right next to the live stock count for your Palazzos and Afghanis.</p>
+    </div>
+
+    <div class="feature-card">
+      <h2>Bulletproof Workflows</h2>
+      <p>Mold the app to your exact rules. Use the Preferences dashboard to physically block stock updates that would drop inventory below zero, ensuring your digital records perfectly match your physical warehouse.</p>
+    </div>
+
+    <div class="feature-card">
+      <h2>Deep-Dive Reporting</h2>
+      <p>Stop pushing dead inventory. Run instant Sales Performance reports to identify your absolute best and worst-selling articles, or generate comprehensive daily and monthly summaries ready for export.</p>
+    </div>
+
+    <div class="feature-card">
+      <h2>Total Device Control</h2>
+      <p>Enterprise-grade oversight. The owner account can manage exactly which devices have access to the database from the central Device Management hub, locking out old hardware instantly.</p>
+    </div>
+
+    <div class="feature-card">
+      <h2>Showroom Privacy Lock</h2>
+      <p>Secure your screen on the floor. Use separate employee PINs and a dedicated App Lock to instantly hide your wholesale pricing and sensitive stock levels from retail walk-ins or unauthorized staff.</p>
+    </div>
+
+    <div class="feature-card">
       <h2>Cloud Backup</h2>
-      <p>Automatic backups to your own Google Drive, independent of any single device.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
-          <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h2>Employee Access Control</h2>
-      <p>Issue each employee their own PIN and revoke it instantly when they leave — no shared passwords to worry about.</p>
+      <p>Your data stays yours. Run automatic backups directly to your own Google Drive on a custom schedule, completely independent of any single physical device.</p>
     </div>
   </section>
 
-  <section class="audience">
-    <h2>Individual sign-in for every employee, no shared password</h2>
+  <section class="highlight-section">
+    <h2>Enterprise security, down to the warehouse floor.</h2>
     <p>
-      One owner account, plus a simple PIN for each employee — issued and revoked
-      individually, so someone who leaves your business can't keep signing back in.
-      Every stock entry is still attributed automatically to whoever's actually signed in.
+      One owner account, plus a secure PIN for every employee. Issue and revoke access individually so former staff cannot sign back in. Every stock entry is permanently attributed to the person who made it—no shared passwords, no accountability gaps.
     </p>
+    <span class="cta-button disabled" aria-disabled="true" style="background: white; color: var(--bg-dark);">Coming Soon &mdash; Download StockGrid</span>
   </section>
 
   <footer>
-    <span>&copy; 2026 StockGrid</span>
+    <span>© 2026 StockGrid. All rights reserved.</span>
     <div class="links">
       <a href="https://src93-tech.github.io/stockgrid-privacy/">Privacy Policy</a>
       <a href="mailto:src93.appsupport@gmail.com">src93.appsupport@gmail.com</a>
     </div>
   </footer>
-</div>
+
+</body>
+</html>
