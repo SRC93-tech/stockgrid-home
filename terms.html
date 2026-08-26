@@ -237,6 +237,67 @@
       margin-bottom: 0;
     }
 
+    /* Mobile Quick Jump Horizontal Scroll Bar */
+    .mobile-quick-nav {
+      display: none;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .mobile-quick-nav::-webkit-scrollbar { display: none; }
+    .quick-jump-list {
+      display: inline-flex;
+      gap: 8px;
+      list-style: none;
+    }
+    .quick-jump-list a {
+      color: #94A3B8;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .quick-jump-list a:hover,
+    .quick-jump-list a:active {
+      background: rgba(79, 70, 229, 0.18);
+      color: #A5B4FC;
+      border-color: rgba(79, 70, 229, 0.4);
+    }
+
+    /* Floating Back to Top Button */
+    .back-to-top-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #1E293B;
+      border: 1px solid var(--border-glass);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .back-to-top-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--border-glass);
@@ -246,10 +307,28 @@
       text-align: center;
     }
 
+    /* Responsive */
     @media (max-width: 840px) {
-      .policy-layout { grid-template-columns: 1fr; }
+      .policy-layout { grid-template-columns: 1fr; gap: 24px; padding-bottom: 50px; }
       .toc-sticky { display: none; }
-      .policy-title { font-size: 34px; }
+      .mobile-quick-nav { display: block; }
+      .policy-hero { padding: 36px 0 24px; margin-bottom: 24px; }
+      .policy-title { font-size: 32px; }
+      .policy-meta { font-size: 13px; }
+      .policy-content section { margin-bottom: 36px; scroll-margin-top: 85px; }
+      .policy-content h2 { font-size: 20px; }
+      .highlight-card { padding: 16px 18px; border-radius: 14px; margin: 16px 0; }
+      .back-btn span:last-child { display: none; }
+      .back-btn::after { content: 'Back'; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .brand-title { font-size: 19px; }
+      .logo-icon-svg { width: 30px; height: 30px; }
+      .policy-title { font-size: 26px; }
+      .badge-pill { font-size: 11.5px; padding: 4px 10px; }
+      .policy-content p, .policy-content li { font-size: 14px; line-height: 1.55; }
     }
   </style>
 </head>
@@ -287,6 +366,21 @@
         Effective: August 2026 • Applicable to StockGrid Android & Multi-Device Services
       </div>
     </div>
+
+    <!-- Mobile Quick-Jump Nav Bar (Swipeable Pills) -->
+    <nav class="mobile-quick-nav" aria-label="Quick jump sections">
+      <ul class="quick-jump-list">
+        <li><a href="#acceptance">1. Acceptance</a></li>
+        <li><a href="#accounts">2. Accounts & PIN</a></li>
+        <li><a href="#license">3. License</a></li>
+        <li><a href="#ownership">4. Ownership</a></li>
+        <li><a href="#sync-service">5. Sync & Cloud</a></li>
+        <li><a href="#termination">6. Termination</a></li>
+        <li><a href="#liability">7. Liability</a></li>
+        <li><a href="#governing-law">8. Governing Law</a></li>
+        <li><a href="#contact">9. Contact</a></li>
+      </ul>
+    </nav>
 
     <!-- Layout -->
     <div class="policy-layout">
@@ -404,5 +498,18 @@
     </div>
   </footer>
 
+  <!-- Floating Back to Top Button on Mobile -->
+  <button id="backToTop" class="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Back to top">↑</button>
+
+  <script>
+    const btt = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        btt.classList.add('visible');
+      } else {
+        btt.classList.remove('visible');
+      }
+    });
+  </script>
 </body>
 </html>
