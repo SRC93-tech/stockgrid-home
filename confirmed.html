@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Confirmed — StockGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0B0F17;
+      --bg-card: #131B2E;
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-sub: #64748B;
+      --c-teal: #14B8A6;
+      --c-pink: #FB7185;
+      --c-indigo: #4F46E5;
+      --c-amber: #F59E0B;
+      --c-emerald: #10B981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Lighting */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(79, 70, 229, 0.08) 50%, transparent 75%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Top Brand Identifier */
+    .brand-top-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-frame {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    .brand-logo-svg {
+      width: 28px;
+      height: 28px;
+    }
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFFFFF 40%, #94A3B8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    /* Card Container */
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 28px;
+      padding: 44px 32px 36px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 50px rgba(16, 185, 129, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Hero Success Checkmark Circle */
+    .success-hero-circle {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.08) 70%);
+      border: 2px solid rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.3), inset 0 0 20px rgba(16, 185, 129, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-svg {
+      width: 36px;
+      height: 36px;
+      stroke: #34D399;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.6));
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34D399;
+      font-weight: 700;
+      font-size: 12.5px;
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+
+    .auth-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+    }
+
+    .auth-desc {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.55;
+    }
+
+    /* Next Steps Step List */
+    .steps-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 8px;
+    }
+    .steps-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #818CF8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+      color: #CBD5E1;
+    }
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(79, 70, 229, 0.2);
+      color: #818CF8;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .footer-legal {
+      margin-top: 32px;
+      font-size: 13px;
+      color: var(--text-sub);
+      text-align: center;
+      position: relative;
+      z-index: 50;
+      pointer-events: auto;
+    }
+    .footer-legal a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin: 0 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .footer-legal a:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <!-- Top Clean Brand Identifier -->
+    <a href="index.html" class="brand-top-row">
+      <div class="brand-logo-frame">
+        <svg class="brand-logo-svg" viewBox="0 0 1024 1024" fill="none">
+          <g transform="rotate(8 512 512)">
+            <rect x="302" y="404" width="420" height="72" rx="36" fill="#14B8A6"/>
+            <rect x="302" y="548" width="420" height="72" rx="36" fill="#FB7185"/>
+            <rect x="404" y="302" width="72" height="420" rx="36" fill="#4F46E5"/>
+            <rect x="548" y="302" width="72" height="420" rx="36" fill="#F59E0B"/>
+            <rect x="404" y="404" width="72" height="72" fill="#14B8A6"/>
+            <rect x="548" y="548" width="72" height="72" fill="#FB7185"/>
+          </g>
+        </svg>
+      </div>
+      <span class="brand-name">StockGrid</span>
+    </a>
+
+    <!-- Main Confirmation Card -->
+    <div class="auth-card">
+      <!-- Emerald Success Ring with Glowing Checkmark -->
+      <div class="success-hero-circle">
+        <svg class="check-svg" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+
+      <div class="status-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Email Verified</span>
+      </div>
+
+      <h1 class="auth-title">You're All Set!</h1>
+      <p class="auth-desc">
+        Your email address has been confirmed and your administrator account is now active.
+      </p>
+
+      <!-- Clear Action Guidance -->
+      <div class="steps-box">
+        <div class="steps-title">Next Steps</div>
+        <div class="step-item">
+          <span class="step-num">1</span>
+          <span>Open the <strong>StockGrid</strong> app on your Android device.</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">2</span>
+          <span>Sign in with your registered business email & password.</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">3</span>
+          <span>Set up your garment catalog and start scanning!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      <div style="margin-bottom: 8px;">© 2026 StockGrid (SRC93-tech). All rights reserved.</div>
+      <div>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
