@@ -32,9 +32,12 @@
 
     html {
       scroll-behavior: smooth;
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -46,6 +49,9 @@
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.6;
       overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
+      position: relative;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -60,12 +66,24 @@
     }
 
     /* Ambient Background Glows */
+    .ambient-glow-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+      contain: paint;
+    }
     .glow-sphere {
       position: absolute;
       border-radius: 50%;
       filter: blur(130px);
       pointer-events: none;
-      z-index: 0;
       opacity: 0.35;
     }
     .glow-1 { top: -100px; left: 20%; width: 500px; height: 500px; background: #4F46E5; }
@@ -74,11 +92,13 @@
 
     /* Container */
     .container {
+      width: 100%;
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 24px;
       position: relative;
       z-index: 1;
+      box-sizing: border-box;
     }
 
     /* Navigation Bar */
@@ -242,39 +262,49 @@
       border-radius: 16px;
       backdrop-filter: blur(12px);
       margin-bottom: 60px;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .loader-anim-mini {
       width: 48px;
       height: 48px;
+      flex-shrink: 0;
     }
     .loader-text {
       text-align: left;
+      min-width: 0;
     }
     .loader-text-title {
       font-size: 13.5px;
       font-weight: 700;
       color: #FFFFFF;
+      word-break: break-word;
     }
     .loader-text-sub {
       font-size: 12px;
       color: var(--text-muted);
+      word-break: break-word;
     }
 
     /* ======================================================== */
     /* REALISTIC ANDROID MOBILE PHONE MOCKUP                    */
     /* ======================================================== */
     .phone-mockup-wrapper {
+      width: 100%;
       max-width: 412px;
       margin: 0 auto 90px;
       position: relative;
+      box-sizing: border-box;
     }
     .phone-outer-shell {
+      width: 100%;
       background: #0F172A;
       border: 8px solid #1E293B;
       border-radius: 46px;
       box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
       overflow: hidden;
       position: relative;
+      box-sizing: border-box;
     }
     
     /* Android Status Bar */
@@ -1110,6 +1140,15 @@
       user-select: none;
     }
 
+    .sec-metric-dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 12px;
+    }
+
     /* Device Registry List in Security Showcase */
     .device-list {
       display: flex;
@@ -1125,6 +1164,8 @@
       border: 1px solid var(--border-glass);
       border-radius: 14px;
       transition: all 0.3s;
+      gap: 12px;
+      flex-wrap: wrap;
     }
     .device-info-name {
       font-size: 13.5px;
@@ -1330,10 +1371,9 @@
     /* Mobile Navigation Drawer */
     .mobile-drawer-backdrop {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
@@ -1586,6 +1626,10 @@
         flex: 1;
         text-align: center;
       }
+      .sec-metric-dual-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
       .security-pillar-grid {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -1636,10 +1680,12 @@
 </head>
 <body>
 
-  <!-- Ambient Glows -->
-  <div class="glow-sphere glow-1"></div>
-  <div class="glow-sphere glow-2"></div>
-  <div class="glow-sphere glow-3"></div>
+  <!-- Ambient Glows Container with strict overflow clipping -->
+  <div class="ambient-glow-wrapper">
+    <div class="glow-sphere glow-1"></div>
+    <div class="glow-sphere glow-2"></div>
+    <div class="glow-sphere glow-3"></div>
+  </div>
 
   <!-- Header -->
   <header>
@@ -2511,7 +2557,7 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; background: rgba(0,0,0,0.25); border-radius: 12px;">
+            <div class="sec-metric-dual-grid">
               <div>
                 <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px;">Floor Scanning & Stock In/Out</div>
                 <div style="font-size: 15px; font-weight: 800; color: #34D399;">✓ 100% Full Speed</div>
